@@ -98,7 +98,8 @@ public class DingDingMsgSendUtils {
 //        StringBuffer msg = new StringBuffer("摊铺现场打卡成功!\n\n");
 //        msg.append("打卡时间：").append(sd.format(System.currentTimeMillis())).append("\n摊铺机编号：").append(s1).append("\n卡号：").append(mnl9);
 //        log.info(msg.toString());
-////        sendRFIDDingTalkMsg(msg.toString());
+//        String r = "123456789qwertyuiop";
+//        r.substring(0,8);
 //    }
 
 }

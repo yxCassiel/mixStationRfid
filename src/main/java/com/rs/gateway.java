@@ -26,15 +26,14 @@ public class gateway {
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 10, 3, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<Runnable>(3),
                 new ThreadPoolExecutor.DiscardOldestPolicy());
-        try{
+        try {
             ServerSocket ss = new ServerSocket(6072);
             while (true) {
                 Socket s = ss.accept();
                 threadPool.execute(new receiveData(s));
             }
-        }catch (Exception e)
-        {
-            log.error(e.getMessage(),e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
     }
 
@@ -43,6 +42,7 @@ public class gateway {
 
     private static class receiveData implements Runnable {
         Socket s;
+
         public receiveData(Socket s) {
             this.s = s;
         }
@@ -57,21 +57,30 @@ public class gateway {
             PrintWriter pw = null;   //下位机客户端——>服务器端
 
             try {
-                br = new BufferedReader(new InputStreamReader(s.getInputStream(),"GBK"));
-                pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream(),"UTF-8")));
+                br = new BufferedReader(new InputStreamReader(s.getInputStream(), "GBK"));
+                pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), "UTF-8")));
 
                 InputStream is = s.getInputStream();
-                byte[] buf = new byte[8];
+                byte[] buf = new byte[24];
                 while ((is.read(buf)) != -1) {
                     String rcard = parseByte2HexStr(buf);
-                    log.info(df.format(System.currentTimeMillis())+"====="+rcard);
+                    log.info(df.format(System.currentTimeMillis()) + "=====" + rcard);
                     int length = rcard.length();
-                    if (rcard.substring(0, 8).equals("12341234")) {
-                        String cardNumber = "M_" + rcard.substring(length - 8);
-                        log.info(df.format(System.currentTimeMillis())+"====="+cardNumber+"=========");
+                    if (rcard.contains("1234123412341234")) {
+                        String str = rcard.split("1234123412341234")[1].substring(0, 8);
+                        String cardNumber = "M_" + str;
+                        log.info(df.format(System.currentTimeMillis()) + "=====" + cardNumber + "=========");
                         forward.send(cardNumber.getBytes());
                         StringBuffer msg = new StringBuffer("拌合现场打卡成功!\n\n");
-                        msg.append("打卡时间：").append(sdf.format(System.currentTimeMillis())).append("\n卡号：").append(rcard.substring(length - 8));
+                        msg.append("打卡时间：").append(sdf.format(System.currentTimeMillis())).append("\n卡号：").append(str);
+                        DingDingMsgSendUtils.sendRFIDDingTalkMsg(msg.toString());
+                    }else if (rcard.contains("12341234")) {
+                        String str = rcard.split("12341234")[1].substring(0, 8);
+                        String cardNumber = "M_" + str;
+                        log.info(df.format(System.currentTimeMillis()) + "=====" + cardNumber + "=========");
+                        forward.send(cardNumber.getBytes());
+                        StringBuffer msg = new StringBuffer("拌合现场打卡成功!\n\n");
+                        msg.append("打卡时间：").append(sdf.format(System.currentTimeMillis())).append("\n卡号：").append(str);
                         DingDingMsgSendUtils.sendRFIDDingTalkMsg(msg.toString());
                     }
                     /*读取分析完毕，将回复帧写入*/
@@ -79,8 +88,8 @@ public class gateway {
                     pw.flush();
                 }
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
-            }finally {
+                log.error(e.getMessage(), e);
+            } finally {
                 //在此关闭输入输出流、socket下位机连接
                 try {
                     br.close();

@@ -26,6 +26,7 @@ public class gateway {
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(2, 10, 3, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<Runnable>(3),
                 new ThreadPoolExecutor.DiscardOldestPolicy());
+
         try {
             ServerSocket ss = new ServerSocket(6072);
             while (true) {
@@ -70,7 +71,7 @@ public class gateway {
                         String str = rcard.split("1234123412341234")[1].substring(0, 8);
                         String cardNumber = "M_" + str;
                         log.info(df.format(System.currentTimeMillis()) + "=====" + cardNumber + "=========");
-                        forward.send(cardNumber.getBytes());
+//                        forward.send(cardNumber.getBytes());
                         StringBuffer msg = new StringBuffer("拌合现场打卡成功!\n\n");
                         msg.append("打卡时间：").append(sdf.format(System.currentTimeMillis())).append("\n卡号：").append(str);
                         DingDingMsgSendUtils.sendRFIDDingTalkMsg(msg.toString());
@@ -78,7 +79,7 @@ public class gateway {
                         String str = rcard.split("12341234")[1].substring(0, 8);
                         String cardNumber = "M_" + str;
                         log.info(df.format(System.currentTimeMillis()) + "=====" + cardNumber + "=========");
-                        forward.send(cardNumber.getBytes());
+//                        forward.send(cardNumber.getBytes());
                         StringBuffer msg = new StringBuffer("拌合现场打卡成功!\n\n");
                         msg.append("打卡时间：").append(sdf.format(System.currentTimeMillis())).append("\n卡号：").append(str);
                         DingDingMsgSendUtils.sendRFIDDingTalkMsg(msg.toString());
@@ -97,7 +98,7 @@ public class gateway {
                     pw.flush();
                     pw.close();
                     s.close();
-                    log.debug("current socket is closed!");
+                    log.info("current socket is closed!");
                 } catch (IOException e) {
                     log.warn("One socket can't be close.");
                     e.printStackTrace();
